@@ -2,6 +2,9 @@
 
 A new Flutter project.
 
+In this project, we can get the weather on the basis of our current location.
+
+To get your own api key for weather data visit https://openweathermap.org
 ## Getting Started
 
 This project is a starting point for a Flutter application.
