@@ -7,7 +7,6 @@ import 'package:weather_project/API.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -35,12 +34,12 @@ class _WeatherState extends State<Weather> {
   Future fetchWeatherData() async {
     Position position = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    final latitude = position.latitude;
-    final longitude = position.longitude;
-    print(latitude);
-    print(longitude);
+    final lat = position.latitude;
+    final long = position.longitude;
+    print(lat);
+    print(long);
     var url =
-        'http://api.openweathermap.org/data/2.5/find?lat=$latitude&lon=$longitude&cnt=10&appid=$apiKey';
+        'http://api.openweathermap.org/data/2.5/find?lat=${lat}&lon=${long}&cnt=10&appid=$apiKey';
     http.Response response = await http.get(url);
     if (response.statusCode == 200) {
       parsedWeather = jsonDecode(response.body);
@@ -51,6 +50,22 @@ class _WeatherState extends State<Weather> {
       print(weatherData);
     } else {
       print('Something went wrong \nrespone Code : ${response.statusCode} ');
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: new Text("Server Error"),
+              content: new Text("Connection to server failed"),
+              actions: <Widget>[
+                new FlatButton(
+                  child: new Text("OK"),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          });
     }
   }
 
@@ -62,25 +77,26 @@ class _WeatherState extends State<Weather> {
 
   Widget _buildGetWeatherButton() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 25.0),
-      width: double.infinity,
+      margin: EdgeInsets.only(
+        top: 10.0,
+        bottom: 10,
+      ),
+      // width: 200,
       child: RaisedButton(
         elevation: 5.0,
         onPressed: fetchWeatherData,
-        padding: EdgeInsets.all(15.0),
+        // padding: EdgeInsets.all(10.0),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30.0),
+          borderRadius: BorderRadius.circular(10.0),
         ),
         color: Colors.white,
-        // hoverElevation: 10.0,
         splashColor: Colors.green,
         child: Text(
           'Get Weather',
           style: TextStyle(
             color: Colors.blue,
-            letterSpacing: 2.0,
-            fontSize: 20.0,
-            fontWeight: FontWeight.bold,
+            fontSize: 15.0,
+            fontWeight: FontWeight.w500,
             fontFamily: 'Poppins',
           ),
         ),
@@ -90,58 +106,62 @@ class _WeatherState extends State<Weather> {
 
   Widget _buildWeatherList() {
     return Container(
-      height: 650,
       child: ListView.builder(
         scrollDirection: Axis.vertical,
         itemCount:
             parsedWeather['list'] == null ? 0 : parsedWeather['list'].length,
         itemBuilder: (context, index) {
           return Container(
-            margin: EdgeInsets.symmetric(vertical: 15),
-            child: Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    "${parsedWeather["list"][index]["name"]}",
-                    style: TextStyle(
-                        fontFamily: 'Montserrat',
-                        fontSize: 22.0,
-                        fontWeight: FontWeight.bold,
+            margin: EdgeInsets.only(bottom: 30),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "${parsedWeather["list"][index]["name"]}",
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w400,
                         fontStyle: FontStyle.normal,
-                        letterSpacing: 2,
-                        color: Colors.black),
-                  ),
-                  Text(
-                    "${parsedWeather["list"][index]["main"]['temp'] - 273.15}ºC",
-                    style: TextStyle(
-                        fontSize: 22.0,
-                        // fontWeight: FontWeight.bold,
-                        letterSpacing: 2,
-                        color: Colors.black),
-                  ),
-                  Text(
-                    "${parsedWeather["list"][index]["wind"]['speed'] * (36 / 10)}km/hr",
-                    style: TextStyle(
-                      fontSize: 22.0,
-                      // fontWeight: FontWeight.bold,
-                      letterSpacing: 2,
-                      color: Colors.black,
+                        // letterSpacing: 2,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
-                  Image.network(
-                    "http://openweathermap.org/img/w/"
-                                "${parsedWeather["list"][index]["weather"][0]['icon']}"
-                            .toString() +
-                        '.png',
-                    // height: 30.0,
-                    // width: 30.0,
-                    // color: Colors.black,
-                  ),
-                ],
-              ),
+                    Text(
+                      "${parsedWeather["list"][index]["main"]['temp'] - 273.15}ºC",
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.black,
+                      ),
+                    ),
+                    Text(
+                      "${parsedWeather["list"][index]["wind"]['speed'] * (36 / 10)}km/hr",
+                      style: TextStyle(
+                        fontSize: 15.0,
+                        fontWeight: FontWeight.w300,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Image.network(
+                  "http://openweathermap.org/img/w/"
+                              "${parsedWeather["list"][index]["weather"][0]['icon']}"
+                          .toString() +
+                      '.png',
+                  // height: 30.0,
+                  // width: 30.0,
+                  // color: Colors.black,
+                ),
+              ],
             ),
+            // ),
           );
         },
       ),
@@ -155,66 +175,42 @@ class _WeatherState extends State<Weather> {
         title: Text('Weather Pokhara'),
         backgroundColor: Colors.lightBlue,
       ),
-      body: Stack(
-        children: <Widget>[
-          Container(
-            height: double.infinity,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.lightBlue, Colors.white],
-              ),
-            ),
-          ),
-          isLoading
-              ? Center(child: CircularProgressIndicator())
-              : Container(
-                  height: double.infinity,
-                  width: double.infinity,
-                  child: SingleChildScrollView(
-                    physics: AlwaysScrollableScrollPhysics(),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.0,
-                      vertical: 10.0,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              _buildGetWeatherButton(),
-                              Container(
-                                margin: EdgeInsets.symmetric(horizontal: 20),
-                                // alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "Today's Weather",
-                                  style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 15,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              _buildWeatherList(),
-                              SizedBox(
-                                height: 40,
-                              )
-                            ],
-                          ),
-                        )
-                        // _buildGetWeatherButton(),
-                        // _buildWeatherList(),
-                      ],
-                    ),
-                  ),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: 20.0,
                 ),
-        ],
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 2,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text(
+                            "Today's Weather",
+                            style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 20,
+                                // color: Colors.white,
+                                fontWeight: FontWeight.w400),
+                          ),
+                          _buildGetWeatherButton(),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      flex: 8,
+                      child: _buildWeatherList(),
+                    ),
+                  ],
+                ),
+              ),
       ),
     );
   }
