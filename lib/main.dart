@@ -32,8 +32,8 @@ class _WeatherState extends State<Weather> {
   String apiKey = API_KEY;
 
   Future fetchWeatherData() async {
-    Position position = await Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position =
+        await getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     final lat = position.latitude;
     final long = position.longitude;
     print(lat);
